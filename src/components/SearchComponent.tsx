@@ -28,6 +28,7 @@ interface SearchComponentState {
   searchResults: Pokemon | null;
   loading: boolean;
   allPokemons: Pokemon[];
+  error: string | null;
 }
 
 class SearchComponent extends Component<object, SearchComponentState> {
@@ -38,6 +39,7 @@ class SearchComponent extends Component<object, SearchComponentState> {
       searchResults: null,
       loading: false,
       allPokemons: [],
+      error: null,
     };
   }
 
@@ -53,7 +55,7 @@ class SearchComponent extends Component<object, SearchComponentState> {
     const { searchTerm } = this.state;
     const processedSearchTerm = searchTerm.trim();
 
-    this.setState({ loading: true });
+    this.setState({ loading: true, error: null });
 
     if (processedSearchTerm === '') {
       this.callApi('https://pokeapi.co/api/v2/pokemon/');
@@ -72,15 +74,27 @@ class SearchComponent extends Component<object, SearchComponentState> {
             searchResults: null,
             loading: false,
           });
-        } else {
+        } else if (data.name) {
           this.setState({
             searchResults: data as Pokemon,
             loading: false,
           });
           localStorage.setItem('searchTerm', this.state.searchTerm);
+        } else {
+          this.setState({
+            searchResults: null,
+            loading: false,
+            error: 'Pokemon not found',
+          });
         }
       })
-
+      .catch(() => {
+        this.setState({
+          searchResults: null,
+          loading: false,
+          error: 'An error occurred',
+        });
+      });
   }
 
   handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +106,7 @@ class SearchComponent extends Component<object, SearchComponentState> {
   }
 
   render() {
-    const { searchTerm, searchResults, loading, allPokemons } = this.state;
+    const { searchTerm, searchResults, loading, allPokemons, error } = this.state;
 
     return (
       <div>
@@ -108,35 +122,39 @@ class SearchComponent extends Component<object, SearchComponentState> {
         </div>
 
         {loading && <p>Loading...</p>}
-        <div>
-          {searchResults ? (
-            <div>
-              <p>Name: {searchResults.name}</p>
-              {searchResults.forms && (
-                <ul>
-                  {searchResults.forms.map((form, index) => (
-                    <li key={index}>
-                      <p>URL: - <a href={form.url}>{form.url}</a></p>
-                      {searchResults.sprites && searchResults.sprites.front_shiny && (
-                        <img src={searchResults.sprites.front_shiny} alt={searchResults.name} />
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : (
-            allPokemons.map((pokemon, index) => (
-              <div key={index}>
-                <p>Name: {pokemon.name}</p>
-                <p>URL: - <a href={pokemon.url}>{pokemon.url}</a></p>
-                {pokemon.sprites && (
-                  <img src={pokemon.sprites.front_shiny} alt={pokemon.name} />
+        {error ? (
+          <p>{error}</p>
+        ) : (
+          <div>
+            {searchResults ? (
+              <div>
+                <p>Name: {searchResults.name}</p>
+                {searchResults.forms && (
+                  <ul>
+                    {searchResults.forms.map((form, index) => (
+                      <li key={index}>
+                        <p>URL: - <a href={form.url}>{form.url}</a></p>
+                        {searchResults.sprites && searchResults.sprites.front_shiny && (
+                          <img src={searchResults.sprites.front_shiny} alt={searchResults.name} />
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              allPokemons.map((pokemon, index) => (
+                <div key={index}>
+                  <p>Name: {pokemon.name}</p>
+                  <p>URL: - <a href={pokemon.url}>{pokemon.url}</a></p>
+                  {pokemon.sprites && (
+                    <img src={pokemon.sprites.front_shiny} alt={pokemon.name} />
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     );
   }
