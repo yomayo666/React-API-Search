@@ -11,7 +11,9 @@ class App extends React.Component {
 
   render() {
     return (
-      <Router> {/* Оборачиваем приложение в Router */}
+      <Router>
+        {' '}
+        {/* Оборачиваем приложение в Router */}
         <ErrorBoundary onError={this.handleSearchError}>
           <SearchComponent />
         </ErrorBoundary>

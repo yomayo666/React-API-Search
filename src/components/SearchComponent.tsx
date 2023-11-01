@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 
 interface Ability {
   name: string;
@@ -102,12 +102,13 @@ const SearchComponent: React.FC = () => {
                     <p>
                       URL: - <a href={form.url}>{form.url}</a>
                     </p>
-                    {searchResults.sprites && searchResults.sprites.front_shiny && (
-                      <img
-                        src={searchResults.sprites.front_shiny}
-                        alt={searchResults.name}
-                      />
-                    )}
+                    {searchResults.sprites &&
+                      searchResults.sprites.front_shiny && (
+                        <img
+                          src={searchResults.sprites.front_shiny}
+                          alt={searchResults.name}
+                        />
+                      )}
                   </li>
                 ))}
               </ul>
@@ -117,7 +118,9 @@ const SearchComponent: React.FC = () => {
           allPokemons.map((pokemon, index) => (
             <div key={index}>
               <p>Name: {pokemon.name}</p>
-              <p>URL: - <a href={pokemon.url}>{pokemon.url}</a></p>
+              <p>
+                URL: - <a href={pokemon.url}>{pokemon.url}</a>
+              </p>
               {pokemon.sprites && (
                 <img src={pokemon.sprites.front_shiny} alt={pokemon.name} />
               )}
