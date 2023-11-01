@@ -1,4 +1,4 @@
-import React, { Component, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 
 interface Ability {
   name: string;
@@ -23,141 +23,110 @@ interface Pokemon {
   sprites?: Sprites;
 }
 
-interface SearchComponentState {
-  searchTerm: string;
-  searchResults: Pokemon | null;
-  loading: boolean;
-  allPokemons: Pokemon[];
-  error: string | null;
-}
+const SearchComponent: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<Pokemon | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-class SearchComponent extends Component<object, SearchComponentState> {
-  constructor(props: object) {
-    super(props);
-    this.state = {
-      searchTerm: localStorage.getItem('searchTerm') || '',
-      searchResults: null,
-      loading: false,
-      allPokemons: [],
-      error: null,
-    };
-  }
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
-  componentDidMount() {
-    if (!this.state.searchTerm) {
-      this.callApi('https://pokeapi.co/api/v2/pokemon/');
-    } else {
-      this.search();
-    }
-  }
-
-  search = () => {
-    const { searchTerm } = this.state;
+  const search = () => {
     const processedSearchTerm = searchTerm.trim();
-
-    this.setState({ loading: true, error: null });
+    setLoading(true);
+    setError(null);
 
     if (processedSearchTerm === '') {
-      this.callApi('https://pokeapi.co/api/v2/pokemon/');
+      callApi('https://pokeapi.co/api/v2/pokemon/');
     } else {
-      this.callApi(`https://pokeapi.co/api/v2/pokemon/${processedSearchTerm}`);
+      callApi(`https://pokeapi.co/api/v2/pokemon/${processedSearchTerm}`);
     }
-  }
+  };
 
-  callApi = (apiUrl: string) => {
+  const callApi = (apiUrl: string) => {
     fetch(apiUrl)
       .then((response) => response.json())
       .then((data: Pokemon | { results: Pokemon[] }) => {
         if ('results' in data) {
-          this.setState({
-            allPokemons: data.results,
-            searchResults: null,
-            loading: false,
-          });
+          setAllPokemons(data.results);
+          setSearchResults(null);
+          setLoading(false);
         } else if (data.name) {
-          this.setState({
-            searchResults: data as Pokemon,
-            loading: false,
-          });
-          localStorage.setItem('searchTerm', this.state.searchTerm);
+          setSearchResults(data as Pokemon);
+          setLoading(false);
         } else {
-          this.setState({
-            searchResults: null,
-            loading: false,
-            error: 'Pokemon not found',
-          });
+          setSearchResults(null);
+          setLoading(false);
+          setError('Pokemon not found');
         }
       })
       .catch(() => {
-        this.setState({
-          searchResults: null,
-          loading: false,
-          error: 'An error occurred',
-        });
+        setSearchResults(null);
+        setLoading(false);
+        setError('An error occurred');
       });
-  }
+  };
 
-  handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ searchTerm: e.target.value });
-  }
-
-  handleThrowError = () => {
+  const handleThrowError = () => {
     throw new Error('This is a bug for testing ErrorBoundary.');
-  }
+  };
 
-  render() {
-    const { searchTerm, searchResults, loading, allPokemons, error } = this.state;
-
-    return (
+  return (
+    <div>
+      {/* Верхняя секция (поиск) */}
       <div>
-        <div>
-          <input
-            type="text"
-            placeholder="Enter your Pokemon's name"
-            value={searchTerm}
-            onChange={this.handleInputChange}
-          />
-          <button onClick={this.search}>Search</button>
-          <button onClick={this.handleThrowError}>Raise an error</button>
-        </div>
+        <input
+          type="text"
+          placeholder="Enter your Pokemon's name"
+          value={searchTerm}
+          onChange={handleInputChange}
+        />
+        <button onClick={search}>Search</button>
+        <button onClick={handleThrowError}>Raise an error</button>
+      </div>
 
+      {/* Нижняя секция (результаты поиска) */}
+      <div>
         {loading && <p>Loading...</p>}
-        {error ? (
-          <p>{error}</p>
-        ) : (
+        {error ? <p>{error}</p> : null}
+        {searchResults ? (
           <div>
-            {searchResults ? (
-              <div>
-                <p>Name: {searchResults.name}</p>
-                {searchResults.forms && (
-                  <ul>
-                    {searchResults.forms.map((form, index) => (
-                      <li key={index}>
-                        <p>URL: - <a href={form.url}>{form.url}</a></p>
-                        {searchResults.sprites && searchResults.sprites.front_shiny && (
-                          <img src={searchResults.sprites.front_shiny} alt={searchResults.name} />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ) : (
-              allPokemons.map((pokemon, index) => (
-                <div key={index}>
-                  <p>Name: {pokemon.name}</p>
-                  <p>URL: - <a href={pokemon.url}>{pokemon.url}</a></p>
-                  {pokemon.sprites && (
-                    <img src={pokemon.sprites.front_shiny} alt={pokemon.name} />
-                  )}
-                </div>
-              ))
+            <p>Name: {searchResults.name}</p>
+            {searchResults.forms && (
+              <ul>
+                {searchResults.forms.map((form, index) => (
+                  <li key={index}>
+                    <p>
+                      URL: - <a href={form.url}>{form.url}</a>
+                    </p>
+                    {searchResults.sprites && searchResults.sprites.front_shiny && (
+                      <img
+                        src={searchResults.sprites.front_shiny}
+                        alt={searchResults.name}
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
+        ) : (
+          allPokemons.map((pokemon, index) => (
+            <div key={index}>
+              <p>Name: {pokemon.name}</p>
+              <p>URL: - <a href={pokemon.url}>{pokemon.url}</a></p>
+              {pokemon.sprites && (
+                <img src={pokemon.sprites.front_shiny} alt={pokemon.name} />
+              )}
+            </div>
+          ))
         )}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default SearchComponent;
