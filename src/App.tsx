@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+  import React from 'react';
+  import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Navigate,
+  } from 'react-router-dom';
+  import './App.css';
+  import SearchComponent from './components/SearchComponent';
+  import ErrorBoundary from './components/ErrorBoundary';
+  import { useParams } from 'react-router-dom';
+  import PokemonDetail from './components/PokemonDetail';
 
-function App() {
-  const [count, setCount] = useState(0)
+  function App() {
+    const handleSearchError = (error: Error) => {
+      console.error('Error in SearchComponent:', error);
+    };
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    return (
+      <Router>
+        <ErrorBoundary onError={handleSearchError}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/search/1" />} />
+            <Route path="/search/:page" element={<SearchComponentWrapper />} />
+            <Route
+              path="/search/:page/:name"
+              element={<SearchComponentWithPokemonDetailWrapper />}
+            />
+          </Routes>
+        </ErrorBoundary>
+      </Router>
+    );
+  }
+  export default App;
+  
+  function SearchComponentWrapper() {
+    const { page } = useParams<{ page: string }>();
 
-export default App
+    return <SearchComponent page={page} />;
+  }
+
+  function SearchComponentWithPokemonDetailWrapper() {
+    const { page, name } = useParams<{ page: string | undefined; name: string }>();
+  
+    const currentPage = page ? parseInt(page, 10) : 1;
+  
+    return (
+      <>
+        <SearchComponent page={page || "1"} />
+        {name && (
+          <PokemonDetail
+            name={name}
+            currentPage={currentPage}
+            onClose={() => {
+              // Обработка закрытия
+            }}
+          />
+        )}
+      </>
+    );
+  }

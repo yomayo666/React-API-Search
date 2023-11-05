@@ -1,0 +1,112 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Pagination from './Pagination';
+import PokemonListProps from './PokemonListProps';
+import ItemsPerPage from './ItemsPerPageProps';
+
+interface PokemonListProps {
+  currentPage: number;
+  searchTerm: string;
+}
+
+export interface Pokemon {
+  name: string;
+  url: string;
+}
+
+const PokemonList: React.FC<PokemonListProps> = ({
+  currentPage,
+  searchTerm,
+}) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const initialItemsPerPage = parseInt(localStorage.getItem('itemsPerPage') || '5', 10);
+  const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const apiUrl =
+          searchTerm !== ''
+            ? `https://pokeapi.co/api/v2/pokemon/${searchTerm}`
+            : `https://pokeapi.co/api/v2/pokemon?offset=${
+                (currentPage - 1) * itemsPerPage
+              }&limit=${2000}`;
+
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if ('results' in data) {
+          const pokemons = data.results as Pokemon[];
+          setAllPokemons(pokemons);
+        } else if ('name' in data) {
+          setAllPokemons([data as Pokemon]);
+        } else {
+          setError('Покемон не найден');
+        }
+      } catch (err) {
+        setError('Покемон не найден');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentPage, searchTerm, itemsPerPage]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const totalPages = Math.ceil(allPokemons.length / itemsPerPage);
+
+  const fetchPokemonInfo = async (name: string) => {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+    const data = await response.json();
+
+    navigate(`/search/${currentPage}/${data.name}`);
+  };
+
+  const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newItemsPerPage = parseInt(event.target.value, 10);
+
+    localStorage.setItem('itemsPerPage', newItemsPerPage.toString());
+
+    setItemsPerPage(newItemsPerPage);
+    navigate(`/search/1${searchTerm ? `/${searchTerm}` : ''}`);
+  };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  return (
+    <div>
+      {searchTerm === '' && (
+        <div>
+          <ItemsPerPage itemsPerPage={itemsPerPage} handleItemsPerPageChange={handleItemsPerPageChange} />
+          <Pagination currentPage={currentPage} totalPages={totalPages} searchTerm={searchTerm} />
+          <PokemonListProps pokemons={allPokemons.slice(startIndex, endIndex)} currentPage={currentPage} fetchPokemonInfo={fetchPokemonInfo} />
+        </div>
+      )}
+      {searchTerm !== '' && (
+        <div className="one-pokemon">
+          <p>Name: {allPokemons[0].name}</p>
+          <Link to={`/search/${currentPage}/${allPokemons[0].name}`}>
+            {allPokemons[0].name}
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PokemonList;
