@@ -1,25 +1,32 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom'; // Импортируем Router
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import SearchComponent from './components/SearchComponent';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useParams } from 'react-router-dom';
 
-class App extends React.Component {
-  handleSearchError = (error: Error) => {
+function App() {
+  const handleSearchError = (error: Error) => {
     console.error('Error in SearchComponent:', error);
   };
 
-  render() {
-    return (
-      <Router>
-        {' '}
-        {/* Оборачиваем приложение в Router */}
-        <ErrorBoundary onError={this.handleSearchError}>
-          <SearchComponent />
-        </ErrorBoundary>
-      </Router>
-    );
-  }
+  return (
+    <Router>
+      <ErrorBoundary onError={handleSearchError}>
+        <Routes>
+          <Route path="/" element={<SearchComponentWrapper />} />{' '}
+          {/* Добавьте маршрут для корневой директории */}
+          <Route path="/search/:page" element={<SearchComponentWrapper />} />
+        </Routes>
+      </ErrorBoundary>
+    </Router>
+  );
+}
+
+function SearchComponentWrapper() {
+  const { page } = useParams<{ page: string }>();
+
+  return <SearchComponent page={page} />;
 }
 
 export default App;

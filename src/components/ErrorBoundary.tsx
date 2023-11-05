@@ -2,7 +2,7 @@ import React, { Component, ReactNode } from 'react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
-  onError?: (error: Error) => void; // Сделаем onError необязательным
+  onError?: (error: Error) => void;
 }
 
 interface ErrorBoundaryState {
@@ -20,7 +20,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     console.error(error);
     this.setState({ hasError: true, error });
     if (this.props.onError) {
-      this.props.onError(error); // Проверяем, предоставлен ли обработчик ошибок
+      this.props.onError(error);
     }
   }
 
