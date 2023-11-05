@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Pagination from './Pagination';
+import PokemonListProps from './PokemonListProps';
+import ItemsPerPage from './ItemsPerPageProps';
 
 interface PokemonListProps {
   currentPage: number;
   searchTerm: string;
 }
 
-interface Pokemon {
+export interface Pokemon {
   name: string;
   url: string;
 }
@@ -19,12 +21,10 @@ const PokemonList: React.FC<PokemonListProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  // Читаем значение itemsPerPage из localStorage при монтировании компонента
   const initialItemsPerPage = parseInt(localStorage.getItem('itemsPerPage') || '5', 10);
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +37,7 @@ const PokemonList: React.FC<PokemonListProps> = ({
             ? `https://pokeapi.co/api/v2/pokemon/${searchTerm}`
             : `https://pokeapi.co/api/v2/pokemon?offset=${
                 (currentPage - 1) * itemsPerPage
-              }&limit=${1300}`;
+              }&limit=${2000}`;
 
         const response = await fetch(apiUrl);
         const data = await response.json();
@@ -62,7 +62,6 @@ const PokemonList: React.FC<PokemonListProps> = ({
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-
   const totalPages = Math.ceil(allPokemons.length / itemsPerPage);
 
   const fetchPokemonInfo = async (name: string) => {
@@ -75,7 +74,6 @@ const PokemonList: React.FC<PokemonListProps> = ({
   const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newItemsPerPage = parseInt(event.target.value, 10);
 
-    // Сохраняем новое значение в localStorage
     localStorage.setItem('itemsPerPage', newItemsPerPage.toString());
 
     setItemsPerPage(newItemsPerPage);
@@ -94,43 +92,14 @@ const PokemonList: React.FC<PokemonListProps> = ({
     <div>
       {searchTerm === '' && (
         <div>
-          <label>
-            Number of Pokémon per page:{' '}
-            <select
-              value={itemsPerPage}
-              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-                handleItemsPerPageChange(event);
-              }}
-            >
-              {Array.from({ length: 100 }, (_, i) => (
-                <option value={i + 1} key={i}>
-                  {i + 1}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            searchTerm={searchTerm}
-          />
-          {allPokemons.slice(startIndex, endIndex).map((pokemon, index) => (
-            <div key={index} className="">
-              <Link
-                to={`/search/${currentPage}/${pokemon.name}`}
-                onClick={() => {
-                  fetchPokemonInfo(pokemon.name);
-                }}
-              >
-                <p>Имя: {pokemon.name}</p>
-              </Link>
-            </div>
-          ))}
+          <ItemsPerPage itemsPerPage={itemsPerPage} handleItemsPerPageChange={handleItemsPerPageChange} />
+          <Pagination currentPage={currentPage} totalPages={totalPages} searchTerm={searchTerm} />
+          <PokemonListProps pokemons={allPokemons.slice(startIndex, endIndex)} currentPage={currentPage} fetchPokemonInfo={fetchPokemonInfo} />
         </div>
       )}
       {searchTerm !== '' && (
-        <div>
-          <p>Имя: {allPokemons[0].name}</p>
+        <div className="one-pokemon">
+          <p>Name: {allPokemons[0].name}</p>
           <Link to={`/search/${currentPage}/${allPokemons[0].name}`}>
             {allPokemons[0].name}
           </Link>
