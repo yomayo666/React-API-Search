@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, {useState } from 'react';
 
 interface PokemonInfo {
-    name: string;
-    weight: number;
-    height: number;
+  name: string;
+  weight: number;
+  height: number;
+  sprites?: Sprites;
 }
+interface Sprites {
+    front_default: string;
+  }
 const PokemonDetail = ({ name }: { name?: string }) => {
-    const [pokemonInfo, setPokemonInfo] = useState<PokemonInfo | null>(null);
+  const [pokemonInfo, setPokemonInfo] = useState<PokemonInfo | null>(null);
 
-  useEffect(() => {
+
     const fetchPokemonInfo = async () => {
       try {
         const response = await fetch(
@@ -26,7 +30,7 @@ const PokemonDetail = ({ name }: { name?: string }) => {
     };
 
     fetchPokemonInfo();
-  }, [name]);
+
 
   return (
     <div className="pokemon-info">
@@ -36,6 +40,8 @@ const PokemonDetail = ({ name }: { name?: string }) => {
           <p>Name: {pokemonInfo.name}</p>
           <p>Weight: {pokemonInfo.weight}</p>
           <p>Height: {pokemonInfo.height}</p>
+          <img src={pokemonInfo.sprites?.front_default} alt={pokemonInfo.name} />
+          
           {/* Здесь вы можете добавить другую информацию о покемоне */}
         </div>
       ) : (

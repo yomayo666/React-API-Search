@@ -20,7 +20,9 @@ const PokemonList: React.FC<PokemonListProps> = ({
   const [allPokemons, setAllPokemons] = useState<Pokemon[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  // Читаем значение itemsPerPage из localStorage при монтировании компонента
+  const initialItemsPerPage = parseInt(localStorage.getItem('itemsPerPage') || '5', 10);
+  const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
 
   const navigate = useNavigate();
 
@@ -46,10 +48,10 @@ const PokemonList: React.FC<PokemonListProps> = ({
         } else if ('name' in data) {
           setAllPokemons([data as Pokemon]);
         } else {
-          setError('Pokemon not found');
+          setError('Покемон не найден');
         }
       } catch (err) {
-        setError('Pokemon not found');
+        setError('Покемон не найден');
       } finally {
         setLoading(false);
       }
@@ -70,13 +72,16 @@ const PokemonList: React.FC<PokemonListProps> = ({
     navigate(`/search/${currentPage}/${data.name}`);
   };
 
-  const handleItemsPerPageChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newItemsPerPage = parseInt(event.target.value, 10);
+
+    // Сохраняем новое значение в localStorage
+    localStorage.setItem('itemsPerPage', newItemsPerPage.toString());
+
     setItemsPerPage(newItemsPerPage);
     navigate(`/search/1${searchTerm ? `/${searchTerm}` : ''}`);
   };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -84,19 +89,25 @@ const PokemonList: React.FC<PokemonListProps> = ({
   if (error) {
     return <p>{error}</p>;
   }
+
   return (
     <div>
       {searchTerm === '' && (
         <div>
           <label>
             Number of Pokémon per page:{' '}
-            <input
-              type="number"
+            <select
               value={itemsPerPage}
-              onChange={handleItemsPerPageChange}
-              min="1"
-              max="50"
-            />
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                handleItemsPerPageChange(event);
+              }}
+            >
+              {Array.from({ length: 100 }, (_, i) => (
+                <option value={i + 1} key={i}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
           </label>
           <Pagination
             currentPage={currentPage}
@@ -105,14 +116,13 @@ const PokemonList: React.FC<PokemonListProps> = ({
           />
           {allPokemons.slice(startIndex, endIndex).map((pokemon, index) => (
             <div key={index} className="">
-              <p>Name: {pokemon.name}</p>
               <Link
                 to={`/search/${currentPage}/${pokemon.name}`}
                 onClick={() => {
                   fetchPokemonInfo(pokemon.name);
                 }}
               >
-                {pokemon.name}
+                <p>Имя: {pokemon.name}</p>
               </Link>
             </div>
           ))}
