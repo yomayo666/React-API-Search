@@ -2,10 +2,15 @@ import React from 'react';
 
 interface ItemsPerPageProps {
   itemsPerPage: number;
-  handleItemsPerPageChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleItemsPerPageChange: (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => void;
 }
 
-const ItemsPerPage: React.FC<ItemsPerPageProps> = ({ itemsPerPage, handleItemsPerPageChange }) => {
+const ItemsPerPage: React.FC<ItemsPerPageProps> = ({
+  itemsPerPage,
+  handleItemsPerPageChange,
+}) => {
   return (
     <label>
       Number of Pokémon per page:{' '}
