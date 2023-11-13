@@ -1,15 +1,19 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePokemonContext } from './PokemonContext'; // Замените на правильный путь
 
-interface Sprites {
+interface PokemonSprites {
   front_default: string;
 }
-
+interface Pokemon {
+  name: string;
+  url: string;
+}
 interface PokemonInfo {
   name: string;
   weight: number;
   height: number;
-  sprites: Sprites;
+  sprites: PokemonSprites;
 }
 
 interface PokemonDetailProps {
@@ -19,20 +23,33 @@ interface PokemonDetailProps {
 }
 
 const PokemonDetail: React.FC<PokemonDetailProps> = ({ name, currentPage, onClose }) => {
-  const [pokemonInfo, setPokemonInfo] = useState<PokemonInfo | null>(null);
+  const { pokemons, setPokemons } = usePokemonContext();
   const [loading, setLoading] = useState(true);
+  const [pokemonInfo, setPokemonInfo] = useState<PokemonInfo | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPokemonInfo = async () => {
       try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-        if (response.ok) {
-          const data = await response.json();
-          setPokemonInfo(data);
-        } else {
-          console.error('Ошибка при загрузке информации о покемоне');
-          throw new Error('Pokemon not found');
+        const cachedPokemon = pokemons.find((pokemon) => pokemon.name === name);
+        if (cachedPokemon) {
+          setPokemonInfo({
+            name: cachedPokemon.name,
+            weight: 0,
+            height: 0,
+            sprites: { front_default: '' },
+          });
+          setLoading(false);
+        } else if (name) {
+          const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+          if (response.ok) {
+            const data: PokemonInfo = await response.json();
+            setPokemonInfo(data);
+            setPokemons((prevPokemons: Pokemon[]) => [...prevPokemons, { name, url: '' }]);
+          } else {
+            console.error('Ошибка при загрузке информации о покемоне');
+            throw new Error('Pokemon not found');
+          }
         }
       } catch (error) {
         console.error('Ошибка при загрузке информации о покемоне', error);
@@ -43,7 +60,7 @@ const PokemonDetail: React.FC<PokemonDetailProps> = ({ name, currentPage, onClos
     };
 
     fetchPokemonInfo();
-  }, [name, navigate]);
+  }, [name, navigate, setPokemons, pokemons]);
 
   const handleClose = () => {
     onClose();

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Pagination from './Pagination';
 import PokemonListProps from './PokemonListProps';
 import ItemsPerPage from './ItemsPerPageProps';
-import { usePokemonContext } from './PokemonContext'; // Импортируем хук из контекста
+import { usePokemonContext } from './PokemonContext'; 
 
 interface PokemonListProps {
   currentPage: number;
@@ -14,7 +14,7 @@ export interface Pokemon {
   url: string;
 }
 const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) => {
-  const { pokemons, setPokemons } = usePokemonContext(); // Используем контекст
+  const { pokemons, setPokemons } = usePokemonContext(); 
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

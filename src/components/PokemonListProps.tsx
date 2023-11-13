@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Pokemon } from './PokemonList';
+interface Pokemon {
+  name: string;
+  url: string; // Добавьте свойство url
+}
+
 interface PokemonListProps {
   pokemons: Pokemon[];
   currentPage: number;
