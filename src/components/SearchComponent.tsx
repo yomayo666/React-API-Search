@@ -16,9 +16,6 @@ export interface Pokemon {
   url: string;
 }
 
-interface Sprites {
-  front_default: string;
-}
 const SearchComponent = ({ page }: { page?: string }) => {
   const [searchTerm, setSearchTermLocal] = useState<string>('');
   const navigate = useNavigate();
@@ -41,7 +38,7 @@ const SearchComponent = ({ page }: { page?: string }) => {
     try {
       dispatch(setMainPageLoading(true)); // Устанавливаем флаг загрузки в true перед запросом
       const newPokemon = await fetchPokemon(searchTerm);
-      
+
       dispatch(addPokemon(newPokemon));
       dispatch(setSearchTerm(searchTerm));
       dispatch(saveSearchResults([newPokemon]));
@@ -56,7 +53,10 @@ const SearchComponent = ({ page }: { page?: string }) => {
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${term}`);
     const data = await response.json();
 
-    const newPokemon: Pokemon = { name: data.name, url: `https://pokeapi.co/api/v2/pokemon/${data.id}/` };
+    const newPokemon: Pokemon = {
+      name: data.name,
+      url: `https://pokeapi.co/api/v2/pokemon/${data.id}/`,
+    };
 
     return newPokemon;
   };

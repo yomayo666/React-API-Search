@@ -1,5 +1,3 @@
-// SearchComponent.test.tsx
-
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -9,7 +7,6 @@ import { store } from '../store/store';
 import { MemoryRouter } from 'react-router-dom';
 import { PokemonProvider } from './PokemonContext';
 import SearchComponent from './SearchComponent';
-import { act } from 'react-dom/test-utils'; // Добавим импорт act
 
 const queryClient = new QueryClient();
 
@@ -35,7 +32,9 @@ const renderWithProviders = (children: React.ReactNode) => (
 describe('SearchComponent', () => {
   it('renders the component', () => {
     render(renderWithProviders(<SearchComponent />));
-    expect(screen.getByPlaceholderText(/Enter your Pokemon's name/i)).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(/Enter your Pokemon's name/i)
+    ).toBeInTheDocument();
   });
 
   it('handles input change', () => {
@@ -49,17 +48,16 @@ describe('SearchComponent', () => {
     render(renderWithProviders(<SearchComponent />));
     const input = screen.getByPlaceholderText(/Enter your Pokemon's name/i);
     const button = screen.getByText('Add');
-  
+
     fireEvent.change(input, { target: { value: 'pikachu' } });
     fireEvent.click(button);
-  
+
     await waitFor(() => {
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
-  
+
     await waitFor(() => {
       expect(screen.getByText('Name: pikachu')).toBeInTheDocument();
     });
   });
-  
 });
