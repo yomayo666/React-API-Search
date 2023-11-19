@@ -15,7 +15,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "./",  // Добавлено для правильного разрешения путей
+    "baseUrl": "./", // Добавлено для правильного разрешения путей
     "paths": {
       "*": ["src/*"]
     }

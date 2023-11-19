@@ -8,9 +8,7 @@ test('PokemonProvider renders children and provides context', () => {
     const context = React.useContext(PokemonContext);
 
     return (
-      <div>
-        {context ? 'Context is available' : 'Context is not available'}
-      </div>
+      <div>{context ? 'Context is available' : 'Context is not available'}</div>
     );
   };
 

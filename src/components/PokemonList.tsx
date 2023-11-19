@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Pagination from './Pagination';
 import PokemonListProps from './PokemonListProps';
 import ItemsPerPage from './ItemsPerPageProps';
-import { usePokemonContext } from './PokemonContext'; 
+import { usePokemonContext } from './PokemonContext';
 
 interface PokemonListProps {
   currentPage: number;
@@ -15,8 +15,11 @@ export interface Pokemon {
   url: string;
 }
 
-const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) => {
-  const { pokemons, setPokemons } = usePokemonContext(); 
+const PokemonList: React.FC<PokemonListProps> = ({
+  currentPage,
+  searchTerm,
+}) => {
+  const { pokemons, setPokemons } = usePokemonContext();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +27,10 @@ const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) =>
   // Хук для навигации
   const navigate = useNavigate();
 
-  const initialItemsPerPage = parseInt(localStorage.getItem('itemsPerPage') || '5', 10);
+  const initialItemsPerPage = parseInt(
+    localStorage.getItem('itemsPerPage') || '5',
+    10
+  );
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
 
   useEffect(() => {
@@ -36,7 +42,9 @@ const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) =>
         const apiUrl =
           searchTerm !== ''
             ? `https://pokeapi.co/api/v2/pokemon/${searchTerm}`
-            : `https://pokeapi.co/api/v2/pokemon?offset=${(currentPage - 1) * itemsPerPage}&limit=${2000}`;
+            : `https://pokeapi.co/api/v2/pokemon?offset=${
+                (currentPage - 1) * itemsPerPage
+              }&limit=${2000}`;
 
         const response = await fetch(apiUrl);
         const data = await response.json();
@@ -71,25 +79,21 @@ const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) =>
     navigate(`/search/${currentPage}/${data.name}`);
   };
 
-
-  const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleItemsPerPageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const newItemsPerPage = parseInt(event.target.value, 10);
-
 
     localStorage.setItem('itemsPerPage', newItemsPerPage.toString());
 
-
     setItemsPerPage(newItemsPerPage);
-
 
     navigate(`/search/1${searchTerm ? `/${searchTerm}` : ''}`);
   };
 
-
   if (loading) {
     return <p>Loading...</p>;
   }
-
 
   if (error) {
     return <p>{error}</p>;
@@ -117,14 +121,13 @@ const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) =>
         </div>
       )}
       {searchTerm !== '' && pokemons[0] && (
-  <div className="one-pokemon">
-    <p>Name: {pokemons[0].name}</p>
-    <Link to={`/search/${currentPage}/${pokemons[0].name}`}>
-      {pokemons[0].name}
-    </Link>
-  </div>
-)}
-
+        <div className="one-pokemon">
+          <p>Name: {pokemons[0].name}</p>
+          <Link to={`/search/${currentPage}/${pokemons[0].name}`}>
+            {pokemons[0].name}
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

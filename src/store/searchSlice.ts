@@ -1,24 +1,29 @@
 // searchSlice.ts
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
 interface PokemonInfo {
   name: string;
   weight: number;
   height: number;
   sprites?: Sprites;
 }
+
 interface Sprites {
   front_default: string;
 }
+
 export interface Pokemon {
   name: string;
   url: string;
 }
+
 interface SearchState {
   searchTerm: string;
   searchResults: Pokemon[] | null;
   selectedPokemon: PokemonInfo | null;
-  mainPageLoading: boolean; // Флаг загрузки для главной страницы
-  detailsPageLoading: boolean; // Флаг загрузки для страницы сведений
+  mainPageLoading: boolean;
+  detailsPageLoading: boolean;
 }
 
 export const initialState: SearchState = {
@@ -40,10 +45,14 @@ const searchSlice = createSlice({
       state.searchResults = action.payload;
     },
     addPokemon: (state, action: PayloadAction<Pokemon>) => {
-      const existingPokemon = state.searchResults?.find((pokemon) => pokemon.name === action.payload.name);
+      const existingPokemon = state.searchResults?.find(
+        (pokemon) => pokemon.name === action.payload.name
+      );
 
       if (!existingPokemon) {
-        state.searchResults = state.searchResults ? [...state.searchResults, action.payload] : [action.payload];
+        state.searchResults = state.searchResults
+          ? [...state.searchResults, action.payload]
+          : [action.payload];
       }
     },
     setSelectedPokemon: (state, action: PayloadAction<PokemonInfo | null>) => {
@@ -67,10 +76,19 @@ export const {
   setDetailsPageLoading,
 } = searchSlice.actions;
 
-export const selectSearchTerm = (state: { search: SearchState }) => state.search.searchTerm;
-export const selectSearchResults = (state: { search: SearchState }) => state.search.searchResults;
-export const selectSelectedPokemon = (state: { search: SearchState }) => state.search.selectedPokemon;
-export const selectMainPageLoading = (state: { search?: SearchState }) => state.search?.mainPageLoading;
-export const selectDetailsPageLoading = (state: { search: SearchState }) => state.search.detailsPageLoading;
+export const selectSearchTerm = (state: { search?: SearchState }) =>
+  state.search?.searchTerm ?? '';
+
+export const selectSearchResults = (state: { search?: SearchState }) =>
+  state.search?.searchResults ?? null;
+
+export const selectSelectedPokemon = (state: { search?: SearchState }) =>
+  state.search?.selectedPokemon ?? null;
+
+export const selectMainPageLoading = (state: { search?: SearchState }) =>
+  state.search?.mainPageLoading ?? false;
+
+export const selectDetailsPageLoading = (state: { search?: SearchState }) =>
+  state.search?.detailsPageLoading ?? false;
 
 export default searchSlice.reducer;

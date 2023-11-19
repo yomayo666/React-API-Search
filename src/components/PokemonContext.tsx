@@ -10,13 +10,17 @@ interface PokemonContextProps {
   setPokemons: React.Dispatch<React.SetStateAction<Pokemon[]>>;
 }
 
-export const PokemonContext = createContext<PokemonContextProps | undefined>(undefined);
+export const PokemonContext = createContext<PokemonContextProps | undefined>(
+  undefined
+);
 
 interface PokemonProviderProps {
   children: ReactNode;
 }
 
-export const PokemonProvider: React.FC<PokemonProviderProps> = ({ children }) => {
+export const PokemonProvider: React.FC<PokemonProviderProps> = ({
+  children,
+}) => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
   return (

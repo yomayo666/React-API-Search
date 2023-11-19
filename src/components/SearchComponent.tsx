@@ -15,12 +15,7 @@ export interface Pokemon {
   name: string;
   url: string;
 }
-interface PokemonInfo {
-  name: string;
-  weight: number;
-  height: number;
-  sprites?: Sprites;
-}
+
 interface Sprites {
   front_default: string;
 }

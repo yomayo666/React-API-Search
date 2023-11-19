@@ -1,4 +1,3 @@
-
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { PokemonProvider } from './PokemonContext';
@@ -29,9 +28,8 @@ test('renders loading state', async () => {
     </BrowserRouter>
   );
 
-  expect(screen.getByText('Loading...')).toBeInTheDocument();
-
+  // Добавляем ожидание, чтобы дождаться завершения асинхронной операции (fetch)
   await waitFor(() => {
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 });
-
