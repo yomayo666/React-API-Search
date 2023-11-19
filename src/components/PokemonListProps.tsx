@@ -1,8 +1,10 @@
+// PokemonListDisplay.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+
 interface Pokemon {
   name: string;
-  url: string; // Добавьте свойство url
+  url: string;
 }
 
 interface PokemonListProps {
@@ -22,7 +24,8 @@ const PokemonListDisplay: React.FC<PokemonListProps> = ({
         <div key={index} className="all-pokemons">
           <Link
             to={`/search/${currentPage}/${pokemon.name}`}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               fetchPokemonInfo(pokemon.name);
             }}
           >

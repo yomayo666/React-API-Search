@@ -9,15 +9,19 @@ interface PokemonListProps {
   currentPage: number;
   searchTerm: string;
 }
+
 export interface Pokemon {
   name: string;
   url: string;
 }
+
 const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) => {
   const { pokemons, setPokemons } = usePokemonContext(); 
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Хук для навигации
   const navigate = useNavigate();
 
   const initialItemsPerPage = parseInt(localStorage.getItem('itemsPerPage') || '5', 10);
@@ -57,6 +61,7 @@ const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) =>
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
+
   const totalPages = Math.ceil(pokemons.length / itemsPerPage);
 
   const fetchPokemonInfo = async (name: string) => {
@@ -66,23 +71,31 @@ const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) =>
     navigate(`/search/${currentPage}/${data.name}`);
   };
 
+
   const handleItemsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newItemsPerPage = parseInt(event.target.value, 10);
 
+
     localStorage.setItem('itemsPerPage', newItemsPerPage.toString());
 
+
     setItemsPerPage(newItemsPerPage);
+
+
     navigate(`/search/1${searchTerm ? `/${searchTerm}` : ''}`);
   };
+
 
   if (loading) {
     return <p>Loading...</p>;
   }
 
+
   if (error) {
     return <p>{error}</p>;
   }
 
+  // Возвращение JSX-разметки компонента
   return (
     <div>
       {searchTerm === '' && (
@@ -103,14 +116,15 @@ const PokemonList: React.FC<PokemonListProps> = ({ currentPage, searchTerm }) =>
           />
         </div>
       )}
-      {searchTerm !== '' && (
-        <div className="one-pokemon">
-          <p>Name: {pokemons[0].name}</p>
-          <Link to={`/search/${currentPage}/${pokemons[0].name}`}>
-            {pokemons[0].name}
-          </Link>
-        </div>
-      )}
+      {searchTerm !== '' && pokemons[0] && (
+  <div className="one-pokemon">
+    <p>Name: {pokemons[0].name}</p>
+    <Link to={`/search/${currentPage}/${pokemons[0].name}`}>
+      {pokemons[0].name}
+    </Link>
+  </div>
+)}
+
     </div>
   );
 };

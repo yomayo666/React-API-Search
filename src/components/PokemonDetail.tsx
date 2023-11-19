@@ -1,66 +1,45 @@
-import React, { useEffect, useState } from 'react';
+// Ваши импорты
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePokemonContext } from './PokemonContext'; // Замените на правильный путь
-
-interface PokemonSprites {
-  front_default: string;
-}
-interface Pokemon {
-  name: string;
-  url: string;
-}
+import { useDispatch } from 'react-redux';
+import { setSelectedPokemon } from '../store/searchSlice';
 interface PokemonInfo {
   name: string;
   weight: number;
   height: number;
-  sprites: PokemonSprites;
+  sprites?: Sprites;
 }
 
-interface PokemonDetailProps {
-  name?: string;
-  currentPage: number;
-  onClose: () => void;
+interface Sprites {
+  front_default: string;
 }
 
-const PokemonDetail: React.FC<PokemonDetailProps> = ({ name, currentPage, onClose }) => {
-  const { pokemons, setPokemons } = usePokemonContext();
-  const [loading, setLoading] = useState(true);
+const PokemonDetail = ({ name, currentPage, onClose }: { name?: string; currentPage: number; onClose: () => void }) => {
   const [pokemonInfo, setPokemonInfo] = useState<PokemonInfo | null>(null);
+  const dispatch = useDispatch();
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPokemonInfo = async () => {
       try {
-        const cachedPokemon = pokemons.find((pokemon) => pokemon.name === name);
-        if (cachedPokemon) {
-          setPokemonInfo({
-            name: cachedPokemon.name,
-            weight: 0,
-            height: 0,
-            sprites: { front_default: '' },
-          });
-          setLoading(false);
-        } else if (name) {
-          const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-          if (response.ok) {
-            const data: PokemonInfo = await response.json();
-            setPokemonInfo(data);
-            setPokemons((prevPokemons: Pokemon[]) => [...prevPokemons, { name, url: '' }]);
-          } else {
-            console.error('Ошибка при загрузке информации о покемоне');
-            throw new Error('Pokemon not found');
-          }
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+        if (response.ok) {
+          const data = await response.json();
+          setPokemonInfo(data);
+
+          // Отправить данные в редуктор
+          dispatch(setSelectedPokemon(data));
+        } else {
+          console.error('Ошибка при загрузке информации о покемоне');
         }
       } catch (error) {
         console.error('Ошибка при загрузке информации о покемоне', error);
-        navigate('/not-found');
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchPokemonInfo();
-  }, [name, navigate, setPokemons, pokemons]);
+  }, [name, dispatch]); // Вызывайте fetchPokemonInfo только при изменении name
 
   const handleClose = () => {
     onClose();
@@ -69,19 +48,17 @@ const PokemonDetail: React.FC<PokemonDetailProps> = ({ name, currentPage, onClos
 
   return (
     <div className="pokemon-info">
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
+      {pokemonInfo ? (
         <div>
-          <button className="close-but" onClick={handleClose}>
-            Закрыть
-          </button>
+          <button className='close-but' onClick={handleClose}>Закрыть</button>
           <h2>Pokemon Information {name}</h2>
-          <p>Name: {pokemonInfo?.name}</p>
-          <p>Weight: {pokemonInfo?.weight}</p>
-          <p>Height: {pokemonInfo?.height}</p>
-          <img src={pokemonInfo?.sprites?.front_default} alt={pokemonInfo?.name} />
+          <p>Name: {pokemonInfo.name}</p>
+          <p>Weight: {pokemonInfo.weight}</p>
+          <p>Height: {pokemonInfo.height}</p>
+          <img src={pokemonInfo.sprites?.front_default} alt={pokemonInfo.name} />
         </div>
+      ) : (
+        <p>Loading...</p>
       )}
     </div>
   );
